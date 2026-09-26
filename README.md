@@ -15,7 +15,7 @@ curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox-releases/main
 默认安装最新正式版本。固定版本或只监听本机：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox-releases/main/install.sh | sudo bash -s -- --version v0.1.2 --listen 127.0.0.1:8180
+curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox-releases/main/install.sh | sudo bash -s -- --version v0.1.3 --listen 127.0.0.1:8180
 ```
 
 要求 Linux x86_64 / arm64、systemd 和本机 Docker Engine。Ubuntu 22.04+、Debian 12+ 自动安装缺失依赖和 Docker；其他发行版需预装 Python 3.9+、Git、curl、CA 证书、tzdata 和 Docker。服务端使用预编译包，宿主机无需 Go 或 Node。
@@ -32,7 +32,7 @@ curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox-releases/main
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox-releases/main/uninstall.sh | sudo bash -s -- --yes
-curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox-releases/main/install.sh | sudo bash -s -- --version v0.1.2
+curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox-releases/main/install.sh | sudo bash -s -- --version v0.1.3
 ```
 
 新安装会生成新密码，旧数据保留在备份中，不自动导入。只预览卸载计划用 `--dry-run`；确定不需要数据时加 `--purge --yes` 永久删除本次安装的配置、凭证及工作区（不删除以前的卸载备份）。没有 `--yes` 时从终端询问确认。
@@ -65,13 +65,13 @@ sudo systemctl restart agentbox
 
 ```bash
 sha256sum --ignore-missing -c SHA256SUMS
-tar -xzf agentbox_v0.1.2_linux_arm64.tar.gz
+tar -xzf agentbox_v0.1.3_linux_arm64.tar.gz
 ```
 
 必须确认所选安装包校验为 `OK`。SHA-256 检查完整性，不是独立数字签名。新安装可以运行解压包中的安装器，仍会下载并验证所选版本：
 
 ```bash
-sudo bash agentbox_v0.1.2_linux_arm64/install.sh --version v0.1.2
+sudo bash agentbox_v0.1.3_linux_arm64/install.sh --version v0.1.3
 ```
 
 后续升级时，将新包解压到新的目录，使用包内工具（把路径和版本替换为实际值）：
@@ -82,6 +82,20 @@ sudo python3 /绝对路径/新版本包/deploy/release.py activate --version vX.
 ```
 
 升级会检查配置和数据库兼容性、备份、切换版本并重启服务，HTTP/WebSocket 会短暂断开；失败不会自动回滚。不要覆盖已有版本目录。工作空间镜像单独管理，服务端升级不自动更新镜像。回退也使用 `activate`，只允许兼容当前数据库的版本。
+
+### v0.1.2 升级至 v0.1.3
+
+可保留原配置、工作空间、用户与历史直接升级，无需卸载。v0.1.3 首次启动自动将数据库从 schema 3 迁移到 8；`activate` 会在停服后用旧版本备份，并由新版本验证。迁移后不能直接激活 v0.1.2 回退，需恢复升级前的配套备份到新目录。
+
+```bash
+# 先下载并校验匹配架构的 v0.1.3 包，再解压到新目录；以下为 arm64 示例
+sudo python3 /绝对路径/agentbox_v0.1.3_linux_arm64/deploy/release.py install --package /绝对路径/agentbox_v0.1.3_linux_arm64
+sudo python3 /绝对路径/agentbox_v0.1.3_linux_arm64/deploy/release.py activate --version v0.1.3
+```
+
+v0.1.2 默认工作空间镜像已经包含 Git/Python，无须仅为 Git 功能重建镜像。自定义镜像需提供 Git、timeout 和 Python 3；客户端与服务端传输网桥必须互通。系统设置中的工作空间镜像不会随服务端包自动切换。控制台的版本提示只提供更新说明与下载入口，尚不执行升级；首次安装脚本也不会升级现有服务。
+
+新增 Git 连接按用户管理，可跨空间复用，仓库按 remote 绑定；本地提交不自动推送。支持 OAuth/PAT/SSH、公司 CA/内网路由、共享账号和 PR/MR。终端授权有效期 30 分钟，可单独撤销；长期凭证留在服务端。OAuth 需管理员注册对应实例的应用。
 
 ## 备份
 
