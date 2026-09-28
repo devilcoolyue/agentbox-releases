@@ -1,21 +1,23 @@
 # Agentbox 下载与安装
 
+> **发布入口已合并到 [devilcoolyue/agentbox](https://github.com/devilcoolyue/agentbox)。** 本仓库保留历史下载与旧版更新兼容镜像，同版本附件与主仓库完全一致。新安装、源码、问题反馈和正式发布请使用主仓库；旧版用户可先按下面步骤升级到 v0.1.5，之后程序从主仓库检查更新。
+
 Agentbox 提供浏览器中的 AI 编码工作空间，支持 Claude Code / Codex CLI、对话、终端、文件、Git、账号池及内网反向隧道。
 
-本仓库仅提供安装入口、用户说明和二进制发布包。下载页面：<https://github.com/devilcoolyue/agentbox-releases/releases>。
+本页提供预编译包的安装与维护说明，完整源码与贡献入口见 [agentbox](https://github.com/devilcoolyue/agentbox)。下载页面：<https://github.com/devilcoolyue/agentbox/releases>。
 
 ## Linux 一键安装
 
 在目标服务器执行（root 用户可以去掉 `sudo`）：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox-releases/main/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox/main/install.sh | sudo bash
 ```
 
 默认安装最新正式版本。固定版本或只监听本机：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox-releases/main/install.sh | sudo bash -s -- --version v0.1.4 --listen 127.0.0.1:8180
+curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox/main/install.sh | sudo bash -s -- --version v0.1.5 --listen 127.0.0.1:8180
 ```
 
 要求 Linux x86_64 / arm64、systemd 和本机 Docker Engine。Ubuntu 22.04+、Debian 12+ 自动安装缺失依赖和 Docker；其他发行版需预装 Python 3.9+、Git、curl、CA 证书、tzdata 和 Docker。服务端使用预编译包，宿主机无需 Go 或 Node。
@@ -31,8 +33,8 @@ curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox-releases/main
 适用于默认目录的一键安装，兼容 v0.1.0。默认停止并禁用服务、移除本安装的工作空间容器，把程序、配置、凭证和数据移到 `/var/backups/agentbox-uninstall/<时间>/`（仅 root 可读），让原目录可用于全新安装。保留 Docker、镜像、其他容器和防火墙规则。备份目录与安装目录需在同一文件系统；自定义目录/服务覆盖配置会拒绝自动卸载。
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox-releases/main/uninstall.sh | sudo bash -s -- --yes
-curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox-releases/main/install.sh | sudo bash -s -- --version v0.1.4
+curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox/main/uninstall.sh | sudo bash -s -- --yes
+curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox/main/install.sh | sudo bash -s -- --version v0.1.5
 ```
 
 新安装会生成新密码，旧数据保留在备份中，不自动导入。只预览卸载计划用 `--dry-run`；确定不需要数据时加 `--purge --yes` 永久删除本次安装的配置、凭证及工作区（不删除以前的卸载备份）。没有 `--yes` 时从终端询问确认。
@@ -65,13 +67,13 @@ sudo systemctl restart agentbox
 
 ```bash
 sha256sum --ignore-missing -c SHA256SUMS
-tar -xzf agentbox_v0.1.4_linux_arm64.tar.gz
+tar -xzf agentbox_v0.1.5_linux_arm64.tar.gz
 ```
 
 必须确认所选安装包校验为 `OK`。SHA-256 检查完整性，不是独立数字签名。新安装可以运行解压包中的安装器，仍会下载并验证所选版本：
 
 ```bash
-sudo bash agentbox_v0.1.4_linux_arm64/install.sh --version v0.1.4
+sudo bash agentbox_v0.1.5_linux_arm64/install.sh --version v0.1.5
 ```
 
 后续升级时，将新包解压到新的目录，使用包内工具（把路径和版本替换为实际值）：
@@ -82,6 +84,17 @@ sudo python3 /绝对路径/新版本包/deploy/release.py activate --version vX.
 ```
 
 升级会检查配置和数据库兼容性、备份、切换版本并重启服务，HTTP/WebSocket 会短暂断开；失败不会自动回滚。不要覆盖已有版本目录。工作空间镜像单独管理，服务端升级不自动更新镜像。回退也使用 `activate`，只允许兼容当前数据库的版本。
+
+### v0.1.4 升级至 v0.1.5
+
+v0.1.5 将安装与更新入口统一到主仓库，并首次提供网页「升级并重启」。旧版没有这个执行入口，先下载并校验 v0.1.5，再手工安装与激活一次；无需卸载，也不要用首次安装命令覆盖原服务。以下以 arm64 为例，amd64 主机选择对应包：
+
+```bash
+sudo python3 /绝对路径/agentbox_v0.1.5_linux_arm64/deploy/release.py install --package /绝对路径/agentbox_v0.1.5_linux_arm64
+sudo python3 /绝对路径/agentbox_v0.1.5_linux_arm64/deploy/release.py activate --version v0.1.5
+```
+
+沿用 schema 8，保留配置、用户、空间和历史；工作空间镜像不变。更早版本仍需遵守下面的数据库迁移与备份要求。旧下载地址继续可用，v0.1.5 在两个仓库的附件逐字节一致；新版本安装后从主仓库检查更新。
 
 ### v0.1.3 升级至 v0.1.4
 
@@ -104,7 +117,15 @@ sudo python3 /绝对路径/agentbox_v0.1.3_linux_arm64/deploy/release.py install
 sudo python3 /绝对路径/agentbox_v0.1.3_linux_arm64/deploy/release.py activate --version v0.1.3
 ```
 
-v0.1.2 默认工作空间镜像已经包含 Git/Python，无须仅为 Git 功能重建镜像。自定义镜像需提供 Git、timeout 和 Python 3；客户端与服务端传输网桥必须互通。系统设置中的工作空间镜像不会随服务端包自动切换。控制台的版本提示只提供更新说明与下载入口，尚不执行升级；首次安装脚本也不会升级现有服务。
+v0.1.2 默认工作空间镜像已经包含 Git/Python，无须仅为 Git 功能重建镜像。自定义镜像需提供 Git、timeout 和 Python 3；客户端与服务端传输网桥必须互通。系统设置中的工作空间镜像不会随服务端包自动切换。首次安装脚本不会升级现有服务。
+
+### 控制台一键升级
+
+先手工升级到包含在线升级功能的版本，后续可由管理员在「关于与更新」点击「升级并重启」。支持以 root 运行的标准 Linux/systemd 版本目录安装，需要 Python 3、systemd-run 和未修改的 agentbox.service（无自定义 drop-in）。不满足条件时页面显示手工升级说明。
+
+升级固定所选正式版本，下载并强制校验 SHA256SUMS，检查配置/数据库兼容性，停服后创建并验证系统备份，再切换版本、更新随包客户端并检查服务健康。工作空间镜像仍单独管理，系统备份不包含工作区一致性快照。网页显示各阶段状态；刷新或断线后可继续查询，核对实际运行版本后提示刷新页面。
+
+升级会短暂断开 HTTP/WebSocket 并可能中断对话，请先结束正在进行的任务。任务由独立 systemd 服务执行，关闭网页不会取消，最长运行 30 分钟。页面提供任务日志命令；服务未恢复时在服务器检查该任务日志及 `journalctl -u agentbox`。下载/校验失败不停止原服务，版本切换前失败会尝试启动原服务；切换后不自动回退，避免数据库不兼容。
 
 新增 Git 连接按用户管理，可跨空间复用，仓库按 remote 绑定；本地提交不自动推送。支持 OAuth/PAT/SSH、公司 CA/内网路由、共享账号和 PR/MR。终端授权有效期 30 分钟，可单独撤销；长期凭证留在服务端。OAuth 需管理员注册对应实例的应用。
 
