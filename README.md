@@ -1,6 +1,6 @@
 # Agentbox 下载与安装
 
-> **发布入口已合并到 [devilcoolyue/agentbox](https://github.com/devilcoolyue/agentbox)。** 本仓库保留历史下载与旧版更新兼容镜像，同版本附件与主仓库完全一致。新安装、源码、问题反馈和正式发布请使用主仓库；旧版用户可升级到 v0.1.9，之后程序从主仓库检查更新。
+> **发布入口已合并到 [devilcoolyue/agentbox](https://github.com/devilcoolyue/agentbox)。** 本仓库保留历史下载与旧版更新兼容镜像，同版本附件与主仓库完全一致。新安装、源码、问题反馈和正式发布请使用主仓库；旧版用户可升级到 v0.1.10，之后程序从主仓库检查更新。
 
 Agentbox 提供浏览器中的 AI 编码工作空间，支持 Claude Code / Codex CLI、对话、终端、文件、Git、账号池及内网反向隧道。
 
@@ -17,7 +17,7 @@ curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox/main/install.
 默认安装最新正式版本。固定版本或只监听本机：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox/main/install.sh | sudo bash -s -- --version v0.1.9 --listen 127.0.0.1:8180
+curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox/main/install.sh | sudo bash -s -- --version v0.1.10 --listen 127.0.0.1:8180
 ```
 
 要求 Linux x86_64 / arm64、systemd 和本机 Docker Engine。Ubuntu 22.04+、Debian 12+ 自动安装缺失依赖和 Docker；其他发行版需预装 Python 3.9+、Git、curl、CA 证书、tzdata 和 Docker。服务端使用预编译包，宿主机无需 Go 或 Node。
@@ -34,7 +34,7 @@ curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox/main/install.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox/main/uninstall.sh | sudo bash -s -- --yes
-curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox/main/install.sh | sudo bash -s -- --version v0.1.9
+curl -fsSL https://raw.githubusercontent.com/devilcoolyue/agentbox/main/install.sh | sudo bash -s -- --version v0.1.10
 ```
 
 新安装会生成新密码，旧数据保留在备份中，不自动导入。只预览卸载计划用 `--dry-run`；确定不需要数据时加 `--purge --yes` 永久删除本次安装的配置、凭证及工作区（不删除以前的卸载备份）。没有 `--yes` 时从终端询问确认。
@@ -67,13 +67,13 @@ sudo systemctl restart agentbox
 
 ```bash
 sha256sum --ignore-missing -c SHA256SUMS
-tar -xzf agentbox_v0.1.9_linux_arm64.tar.gz
+tar -xzf agentbox_v0.1.10_linux_arm64.tar.gz
 ```
 
 必须确认所选安装包校验为 `OK`。SHA-256 检查完整性，不是独立数字签名。新安装可以运行解压包中的安装器，仍会下载并验证所选版本：
 
 ```bash
-sudo bash agentbox_v0.1.9_linux_arm64/install.sh --version v0.1.9
+sudo bash agentbox_v0.1.10_linux_arm64/install.sh --version v0.1.10
 ```
 
 后续升级时，将新包解压到新的目录，使用包内工具（把路径和版本替换为实际值）：
@@ -84,6 +84,14 @@ sudo python3 /绝对路径/新版本包/deploy/release.py activate --version vX.
 ```
 
 升级会检查配置和数据库兼容性、备份、切换版本并重启服务，HTTP/WebSocket 会短暂断开；失败不会自动回滚。不要覆盖已有版本目录。工作空间镜像单独管理，服务端升级不自动更新镜像。回退也使用 `activate`，只允许兼容当前数据库的版本。
+
+### 升级至 v0.1.10
+
+本版为网页控制台与 abox-link 面板加入简体中文、繁体中文和英文，默认跟随系统，不支持时回退英文；可在网页登录页／用户菜单和 abox-link 面板顶部即时切换，偏好保存在当前设备。表单草稿和终端连接保留，终端输出、用户内容与服务端原始诊断不翻译。
+
+从 v0.1.9 升级保持 schema 10，无新增数据库迁移；API、WebSocket 和配对协议不变，同步仍默认关闭。从 v0.1.8 升级仍会执行 schema 9 → 10 迁移，按下节先验证备份，不能将迁移后的数据库直接交给 v0.1.8。使用「关于与更新」或已校验发布包内的 `deploy/release.py` 升级，不要重复运行首次安装命令。
+
+v0.1.10 包含 Linux amd64/arm64 服务端与五个平台 abox-link，共七个归档及 `release.json`、`SHA256SUMS`。服务端升级会更新网页和可下载的 abox-link 文件；本机运行的旧 abox-link 仍需手动下载替换。本次不发布新的桌面安装包，已发布 Desktop 0.1.2 不含多语言，升级服务端不会改变其界面或安装版本。服务端与工作空间镜像仍独立管理。
 
 ### v0.1.8 升级至 v0.1.9
 
@@ -118,7 +126,7 @@ v0.1.9 是 Desktop 0.1.2 的配套服务端，新增桌面能力发现、配对�
 服务端包附带可选浏览器镜像配方。在解包目录运行（基础镜像名按当前配置替换）：
 
 ```bash
-AGENTBOX_BROWSER_BASE_IMAGE=agentbox-agent:v0.1.9 ./scripts/build-browser-image.sh
+AGENTBOX_BROWSER_BASE_IMAGE=agentbox-agent:v0.1.10 ./scripts/build-browser-image.sh
 ```
 
 然后在「系统设置 → 容器」将镜像设为 `agentbox-agent:browser`，停止并重新启动需要浏览器的空间。Linux amd64 使用固定版本 Google Chrome for Testing，ARM 使用 Chromium。推荐每空间 2 GiB 内存、2 CPU、512 PID。服务器需允许非特权用户命名空间，Chrome 沙箱保持开启。
